@@ -1,6 +1,8 @@
-# Creating Localized Kubernetes Cluster with Vagrant and Hyper-V
+# Creating Kubernetes mixed nodes cluster with Vagrant and Hyper-V.
 
-* Create nodes
-* Setup ingress-nginx
-* Setup MetalLB
+This repo describes the process of creating Kubernetes 1.14 cluster
+with mixed Linux/Windows worker nodes on Windows.
 
+* Create nodes using Vagrant. See [nodes](./nodes/README.md).
+* Setup ingress-nginx. See [ingress](./ingress/README.md).
+* Setup MetalLB. See [ingress](./metallb/README.md).
