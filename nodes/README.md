@@ -39,7 +39,7 @@ vagrant up  --provider=hyperv
 Login into Windows VM and in elevated Powershell execute:
 
 ```shell
-cd c:\vargrant\win-worker
+cd c:\vagrant\win-worker
 .\start-k8s.ps1
 ```
 
