@@ -1,4 +1,4 @@
-$env:KUBECONFIG = Resolve-Path "..\..\nodes\config"
+$env:KUBECONFIG = Resolve-Path "..\..\config"
 
 kubectl apply -f hello-world-linux.yaml 
 kubectl apply -f hello-world-win.yaml 
@@ -7,7 +7,7 @@ kubectl apply -f hello-world-win.yaml
 function WaitForPodToStart([string] $podName) {
     Write-Host "Waiting for $podName to start..."
     while ($true) {
-        $status = GetPodStatus("hello-world")
+        $status = GetPodStatus($podName)
         if ($status -eq "Running") {
             break;
         }
@@ -19,7 +19,7 @@ function WaitForPodToStart([string] $podName) {
 }
 
 function GetPodStatus([string] $podName) {
-    return (kubectl get pod hello-world-linux -o json | ConvertFrom-Json | Select -ExpandProperty Status | Select -ExpandProperty phase).Trim()
+    return (kubectl get pod $podName -o json | ConvertFrom-Json | Select -ExpandProperty Status | Select -ExpandProperty phase).Trim()
 }
 
 

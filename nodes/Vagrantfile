@@ -89,8 +89,7 @@ Vagrant.configure("2") do |config|
       worker.winrm.username = "vagrant"
       worker.winrm.password = "vagrant"
       worker.vm.provision "shell", path: './win-worker/configure-windows.ps1', name: "Install Docker"
-      worker.vm.provision "shell", path: './win-worker/install-docker.ps1', name: "Install Docker"
-      worker.vm.provision :reload
+      worker.vm.provision "shell", path: './win-worker/install-docker.ps1', name: "Install Docker", reboot: true
       worker.vm.provision "shell", path: './win-worker/install-k8s.ps1', name: "Install k8s"
       worker.vm.provision "shell", path: './win-worker/start-k8s.ps1', name: "Start k8s"
     end

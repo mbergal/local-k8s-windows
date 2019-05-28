@@ -45,6 +45,9 @@ powershell $install -NetworkMode "$NetworkMode" -clusterCIDR "$ClusterCIDR" -Kub
 powershell $BaseDir\start-kubelet.ps1 -RegisterOnly -NetworkMode $NetworkMode
 ipmo C:\k\hns.psm1
 
+
+exit
+
 # Start Infra services
 # Start Flanneld
 StartFlanneld -ipaddress $ManagementIP -NetworkName $NetworkName

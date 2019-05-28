@@ -77,9 +77,15 @@ spec:
 
 ### Installation Results
 
-* Master (Vagrant name `master`, virtual machine name `k8s-master`)
-* Linux worker  (Vagrant name `worker-1`, virtual machine name `k8s-worker-1`)
-* Windows worker (Vagrant name `win-worker-1`, virtual machine name `k8s-win-worker-1`) 
+
+* Virtual Machines
+
+| Vagrant name  | VM name        | User    | Password |
+|---------------|----------------|---------|---------|
+| `master`      | `k8s-master`   | vagrant | vagrant |
+| `worker-1`    | `k8s-worker-1` | vagrant | vagrant |
+| `win-worker-1`| `k8s-win-worker-1` | Vagrant | vagrant |
+
 * Cluster config file `config`
 * Cluster join instructions `kubeadm-join`
 * Cluster join script `kubeadm-join.sh`
