@@ -1,0 +1,100 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+# require 'getoptlong'
+
+num_workers = 1
+master_memory = 4096
+master_cpu_cores = 2
+worker_memory = 4096
+worker_cpu_cores = 2
+
+
+def requiredEnvironmentVariable(name)
+  r = ENV[name]
+  if r.to_s.strip.empty? then
+    raise "Environment variable #{name} is required"
+  end
+  return r
+end
+
+
+vagrantSmbUsername = requiredEnvironmentVariable("VAGRANT_SMB_USERNAME")
+vagrantSmbUsernameNoDomain = vagrantSmbUsername.split("\\").last
+vagrantSmbPassword = requiredEnvironmentVariable("VAGRANT_SMB_PASSWORD")
+
+Vagrant.configure("2") do |config|
+  puts vagrantSmbUsername
+  config.vm.synced_folder ".", "/vagrant", type: "smb",
+      smb_password: vagrantSmbPassword, smb_username: vagrantSmbUsername
+
+    # This is just a way to enable MAC address spoofing 
+    # We do it for all VMs because I just don't have
+    # a better way to do it
+    config.trigger.before :provisioner_run, type: :hook do |t|
+      t.run = { inline: "Get-VM  | Set-VMNetworkAdapter -MacAddressSpoofing On" }
+ 	end
+
+  # Master Configuration
+  config.vm.define "master", primary: true do |master|
+    master.vm.synced_folder ".", "/vagrant", type: "smb",
+      smb_password: vagrantSmbPassword, smb_username: vagrantSmbUsernameNoDomain
+    master.vm.box = "bento/ubuntu-16.04"
+    master.vm.hostname = "master"
+    #master.vmname = 
+    master.vm.provider "hyperv" do |hyperv|
+      hyperv.vmname = "k8s-master"
+      hyperv.memory = master_memory
+      hyperv.cpus = master_cpu_cores
+    end
+    master.vm.network "public_network", bridge: "Default Switch"
+    master.vm.provision "shell", path: './install-docker.sh', name: "Install Docker"
+    master.vm.provision "shell", path: './install-k8s.sh', name: "Install k8s"
+    master.vm.provision "shell", path: './master/install-master.sh', name: "Configure master"
+  end
+
+  # Worker Configuration
+  (1..num_workers).each do |worker_id|
+
+    config.vm.define "worker-#{worker_id}" do |worker|
+      worker.vm.synced_folder ".", "/vagrant", type: "smb",
+        smb_password: vagrantSmbPassword, smb_username: vagrantSmbUsernameNoDomain
+      worker.vm.box = "bento/ubuntu-16.04"
+      worker.vm.hostname = "worker-#{worker_id}"
+      worker.vm.provider "hyperv" do |hyperv|
+        hyperv.vmname = "k8s-worker-#{worker_id}"
+        hyperv.memory = worker_memory
+        hyperv.cpus = worker_cpu_cores
+      end
+      worker.vm.network "public_network", bridge: "Default Switch"
+      worker.vm.provision "shell", path: './install-docker.sh', name: "Install Docker"
+      worker.vm.provision "shell", path: './install-k8s.sh', name: "Install k8s"
+      worker.vm.provision "shell", path: './worker/install-worker.sh', name: "Configure worker"
+    end
+  end
+  (1..num_workers).each do |worker_id|
+    config.vm.define "win-worker-#{worker_id}" do |worker|
+      worker.vm.synced_folder ".", "/vagrant", type: "smb",  mount_options: ["vers=3"],
+        smb_password: vagrantSmbPassword, smb_username: vagrantSmbUsername
+      worker.vm.box = "StefanScherer/windows_2019"
+      worker.vm.hostname = "win-worker-#{worker_id}"
+      worker.vm.provider "hyperv" do |hyperv|
+        hyperv.vmname = "k8s-win-worker-#{worker_id}"
+        hyperv.enable_virtualization_extensions = true
+        hyperv.linked_clone = true
+        hyperv.memory = worker_memory
+        hyperv.cpus = worker_cpu_cores
+      end
+      worker.vm.network "private_network", bridge: "Default Switch"
+      worker.vm.communicator = "winrm"
+      worker.winrm.username = "vagrant"
+      worker.winrm.password = "vagrant"
+      worker.vm.provision "shell", path: './win-worker/configure-windows.ps1', name: "Install Docker"
+      worker.vm.provision "shell", path: './win-worker/install-docker.ps1', name: "Install Docker"
+      worker.vm.provision :reload
+      worker.vm.provision "shell", path: './win-worker/install-k8s.ps1', name: "Install k8s"
+      worker.vm.provision "shell", path: './win-worker/start-k8s.ps1', name: "Start k8s"
+    end
+  end
+
+end
+

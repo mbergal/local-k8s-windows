@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ingress-nginx
+bases:
+- github.com/kubernetes/ingress-nginx/deploy/cluster-wide
+- github.com/kubernetes/ingress-nginx/deploy/baremetal
+patches:
+- ./ingress-nginx-service.yaml 
+- ./ingress-nginx-deployment.yaml

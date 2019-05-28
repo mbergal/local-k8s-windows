@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-world-linux
+spec:
+  containers:
+  - name: hello-world-linux
+    image: ubuntu:18.04
+    command: [ "sleep" ]
+    args: ["infinity" ]
+  nodeSelector: 
+    kubernetes.io/os: linux
+

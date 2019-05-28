@@ -1,0 +1,6 @@
+.vagrant/
+kubeadm-join
+config
+kubeadm-join.sh
+bin/
+.idea/
