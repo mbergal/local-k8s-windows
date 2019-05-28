@@ -34,7 +34,16 @@ vagrant destroy -f
 vagrant up  --provider=hyperv
 ```
 
-If vagrant is stuck creating windows node:
+**IMPORTANT:** The last step of Windows worker configuration needs: to be done manually
+
+Login into Windows VM and in elevated Powershell execute:
+
+```shell
+cd c:\vargrant\win-worker
+.\start-k8s.ps1
+```
+
+If Vagrant is stuck creating windows node:
 
 * Ctrl-C
 * Kill `ruby.exe`

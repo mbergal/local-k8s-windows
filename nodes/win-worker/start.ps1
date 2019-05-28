@@ -38,6 +38,7 @@ if (!(Test-Path $install))
     Start-BitsTransfer "https://raw.githubusercontent.com/$GithubSDNRepository/master/Kubernetes/windows/install.ps1" -Destination c:\k\install.ps1
 }
 
+
 # Download files, move them, & prepare network
 powershell $install -NetworkMode "$NetworkMode" -clusterCIDR "$ClusterCIDR" -KubeDnsServiceIP "$KubeDnsServiceIP" -serviceCIDR "$ServiceCIDR" -InterfaceName "'$InterfaceName'" -LogDir "$LogDir"
 
@@ -46,7 +47,6 @@ powershell $BaseDir\start-kubelet.ps1 -RegisterOnly -NetworkMode $NetworkMode
 ipmo C:\k\hns.psm1
 
 
-exit
 
 # Start Infra services
 # Start Flanneld
