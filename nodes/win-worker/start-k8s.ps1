@@ -1,14 +1,16 @@
-Start-Transcript c:\start-k8s.log
+$ipAddress = Get-NetIPAddress | Where { $_.InterfaceAlias.Contains("(Ethernet)") -and $_.AddressFamily -eq "IPv4" } | Select -ExpandProperty IPAddress
 
-$ipAddress = Get-NetIPAddress | Sort-Object ifIndex | Where { $_.PrefixOrigin -ne "WellKnown" } | Select -First 1 | Select -ExpandProperty IPAddress
-
+Write-Host "Management IP: $ipAddress"
 cd c:\vagrant\win-worker
 .\start.ps1 `
     -ManagementIP $ipAddress `
     -LogDir c:\k
 
-c:\k\stop.ps1
+exit
 
+Start-Sleep -Seconds 60
+
+c:\k\stop.ps1
 cd c:\vagrant\win-worker
 .\register-svc.ps1 -ManagementIP $ipAddress -LogDir c:\k
 

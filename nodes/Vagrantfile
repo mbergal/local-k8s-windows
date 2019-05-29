@@ -7,6 +7,7 @@ master_memory = 4096
 master_cpu_cores = 2
 worker_memory = 4096
 worker_cpu_cores = 2
+bridge = "Default Switch"
 
 
 def requiredEnvironmentVariable(name)
@@ -46,7 +47,7 @@ Vagrant.configure("2") do |config|
       hyperv.memory = master_memory
       hyperv.cpus = master_cpu_cores
     end
-    master.vm.network "public_network", bridge: "Default Switch"
+    master.vm.network "private_network", bridge: bridge
     master.vm.provision "shell", path: './install-docker.sh', name: "Install Docker"
     master.vm.provision "shell", path: './install-k8s.sh', name: "Install k8s"
     master.vm.provision "shell", path: './master/install-master.sh', name: "Configure master"
@@ -88,6 +89,7 @@ Vagrant.configure("2") do |config|
       worker.vm.communicator = "winrm"
       worker.winrm.username = "vagrant"
       worker.winrm.password = "vagrant"
+      worker.winrm.execution_time_limit = "PT4M" 
       worker.vm.provision "shell", path: './win-worker/configure-windows.ps1', name: "Install Docker"
       worker.vm.provision "shell", path: './win-worker/install-docker.ps1', name: "Install Docker", reboot: true
       worker.vm.provision "shell", path: './win-worker/install-k8s.ps1', name: "Install k8s"

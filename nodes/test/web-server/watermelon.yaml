@@ -1,0 +1,24 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: watermelon-app
+  labels:
+    app: watermelon
+spec:
+  containers:
+    - name: watermelon-app
+      image: mcr.microsoft.com/windows/servercore/iis:windowsservercore-ltsc2019
+  nodeSelector:
+    beta.kubernetes.io/os: windows
+
+---                               
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: watermelon-service
+spec:
+  selector:
+    app: watermelon
+  ports:
+    - port: 80 # Default port for image
