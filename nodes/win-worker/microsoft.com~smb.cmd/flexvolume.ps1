@@ -1,4 +1,4 @@
-$debug_mode = $false
+$debug_mode = $true
 $exitCode = 0
 $logName = "Application"
 $logId = 1
@@ -85,14 +85,19 @@ Function MakeSymLink($symlink, $remotepath)
     # this does not work for windows, so lets delete the folder
     if($(test-path $symlink -PathType Container))
     {
+        Log "$symlink exists"
         $item = get-item $symlink
+        Log $item.LinkType
         if($item.LinkType -eq $null)
         {
             Log "deleting folder $symlink"
             #if not empty this will throw
+            $a =  (ls $item) | Out-String
+            Log $a
             $item.delete()
         }
     }
+    Log "continue"
     if($(test-path $symlink -PathType Container))
     {
         $item = get-item $symlink

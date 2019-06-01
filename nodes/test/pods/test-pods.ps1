@@ -2,6 +2,7 @@ $env:KUBECONFIG = Resolve-Path "..\..\config"
 
 kubectl apply -f hello-world-linux.yaml 
 kubectl apply -f hello-world-win.yaml 
+kubectl apply -f hello-world-win-secrets.yaml 
 
 
 function WaitForPodToStart([string] $podName) {

@@ -2,12 +2,21 @@
 # vi: set ft=ruby :
 # require 'getoptlong'
 
+
+# k8s switch - 192.168.200.1
+# dhcp - 192.168.200.2
+# k8s-storage - 192.168.200.3
+# k8s-master - 192.168.200.4
+# k8s-worker-1 - 192.168.200.5
+# k8s-win-worker-1 - 192.168.200.6
+
 num_workers = 1
 master_memory = 4096
 master_cpu_cores = 2
 worker_memory = 4096
 worker_cpu_cores = 2
-bridge = "Default Switch"
+# bridge = "Default Switch"
+bridge = "k8s"
 
 
 def requiredEnvironmentVariable(name)
@@ -23,6 +32,8 @@ vagrantSmbUsername = requiredEnvironmentVariable("VAGRANT_SMB_USERNAME")
 vagrantSmbUsernameNoDomain = vagrantSmbUsername.split("\\").last
 vagrantSmbPassword = requiredEnvironmentVariable("VAGRANT_SMB_PASSWORD")
 
+
+
 Vagrant.configure("2") do |config|
   puts vagrantSmbUsername
   config.vm.synced_folder ".", "/vagrant", type: "smb",
@@ -35,6 +46,42 @@ Vagrant.configure("2") do |config|
       t.run = { inline: "Get-VM  | Set-VMNetworkAdapter -MacAddressSpoofing On" }
  	end
 
+  # config.trigger.after :machine_action_up, type: :hook do |t|
+  #     t.ruby = proc{|env,machine| 
+  #      puts "VBoxManage showvminfo #{machine.inspect}"
+  #      puts "VBoxManage showvminfo #{env.inspect}"
+  #      }
+ 	# end
+
+  # DHCP needs to be created on Default Switch and then manually moved to k8s switch
+  config.vm.define "dhcp" do |dhcp|
+    dhcp.vm.synced_folder ".", "/vagrant", type: "smb", # mount_options: ["vers=3.02","mfsymlinks","dir_mode=0775","file_mode=0774","sec=ntlm"],
+        smb_password: vagrantSmbPassword, smb_username: vagrantSmbUsernameNoDomain
+    dhcp.vm.box = "bento/ubuntu-16.04"
+    dhcp.vm.provider "hyperv" do |hyperv|
+      hyperv.vmname = "dhcp"
+    end
+    dhcp.vm.network "private_network", bridge: "Default Switch"
+    dhcp.vm.provision "shell", path: 'dhcp/install-dhcp.sh', name: "install-dhcp.sh"
+  end
+
+  config.vm.define "storage", primary: true do |storage|
+    storage.vm.synced_folder ".", "/vagrant", type: "smb",
+      smb_password: vagrantSmbPassword, smb_username: vagrantSmbUsernameNoDomain
+    storage.vm.box = "bento/ubuntu-16.04"
+    storage.vm.hostname = "storage"
+    #master.vmname = 
+    storage.vm.provider "hyperv" do |hyperv|
+      hyperv.vmname = "k8s-storage"
+      hyperv.memory = master_memory
+      hyperv.cpus = master_cpu_cores
+      hyperv.mac = "00155D300175"
+    end
+    storage.vm.network "private_network", bridge: bridge
+    storage.vm.provision "shell", path: './storage/install-nfs.sh', name: "Install NFS"
+    storage.vm.provision "shell", path: './storage/install-samba.sh', name: "Install Samba"
+  end
+
   # Master Configuration
   config.vm.define "master", primary: true do |master|
     master.vm.synced_folder ".", "/vagrant", type: "smb",
@@ -46,12 +93,14 @@ Vagrant.configure("2") do |config|
       hyperv.vmname = "k8s-master"
       hyperv.memory = master_memory
       hyperv.cpus = master_cpu_cores
+      hyperv.mac = "00155D30016A"
     end
     master.vm.network "private_network", bridge: bridge
     master.vm.provision "shell", path: './install-docker.sh', name: "Install Docker"
     master.vm.provision "shell", path: './install-k8s.sh', name: "Install k8s"
     master.vm.provision "shell", path: './master/install-master.sh', name: "Configure master"
   end
+
 
   # Worker Configuration
   (1..num_workers).each do |worker_id|
@@ -65,8 +114,9 @@ Vagrant.configure("2") do |config|
         hyperv.vmname = "k8s-worker-#{worker_id}"
         hyperv.memory = worker_memory
         hyperv.cpus = worker_cpu_cores
+        hyperv.mac = "00155D30016B" # need to take into accoung worker_id
       end
-      worker.vm.network "public_network", bridge: "Default Switch"
+      worker.vm.network "public_network", bridge: bridge
       worker.vm.provision "shell", path: './install-docker.sh', name: "Install Docker"
       worker.vm.provision "shell", path: './install-k8s.sh', name: "Install k8s"
       worker.vm.provision "shell", path: './worker/install-worker.sh', name: "Configure worker"
@@ -84,18 +134,20 @@ Vagrant.configure("2") do |config|
         hyperv.linked_clone = true
         hyperv.memory = worker_memory
         hyperv.cpus = worker_cpu_cores
+        hyperv.mac = "00155D300173" # need to take into accoung worker_id
       end
       worker.vm.network "private_network", bridge: "Default Switch"
       worker.vm.communicator = "winrm"
       worker.winrm.username = "vagrant"
       worker.winrm.password = "vagrant"
       worker.winrm.execution_time_limit = "PT4M" 
-      worker.vm.provision "shell", path: './win-worker/configure-windows.ps1', name: "Install Docker"
+      worker.vm.provision "shell", path: './win-worker/configure-windows.ps1', name: "Configure Windows"
       worker.vm.provision "shell", path: './win-worker/install-docker.ps1', name: "Install Docker", reboot: true
       worker.vm.provision "shell", path: './win-worker/install-k8s.ps1', name: "Install k8s"
       # worker.vm.provision "shell", path: './win-worker/start-k8s.ps1', name: "Start k8s"
     end
   end
+
 
 end
 

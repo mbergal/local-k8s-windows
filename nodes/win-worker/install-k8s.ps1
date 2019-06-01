@@ -1,11 +1,15 @@
 param([switch] $Force);
 
+
+$ErrorActionPreference = "Stop"
+
+Write-Host ($PSVersionTable|Out-String)
+
 if ((Test-Path -Path C:\install-k8s.done) -and -not $Force) {
     Write-Host "This has already been done"
     exit 0;
 }
 
-$ErrorActionPreference = "Stop"
 
 Write-Host "Starting Docker ..."
 Start-Service Docker
@@ -40,6 +44,10 @@ Write-Host "...done"
 Write-Host "Getting start.ps1 ..."
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 wget https://raw.githubusercontent.com/Microsoft/SDN/master/Kubernetes/flannel/start.ps1 -o start.ps1
+Write-Host "...done"
+
+Write-Host "Setting up flexvolume SMB plugin for k8s..."
+cp -R c:\vagrant\win-worker\microsoft.com~smb.cmd c:\usr\libexec\kubernetes\kubelet-plugins\volume\exec\ -Force -Container
 Write-Host "...done"
 
 echo "" > C:\install-k8s.done

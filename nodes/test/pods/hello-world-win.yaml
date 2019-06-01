@@ -8,6 +8,24 @@ spec:
     image:  mcr.microsoft.com/windows/servercore:ltsc2019
     command: ["ping"]
     args: ["-t",  "127.0.0.1" ]
+    volumeMounts:
+        - name: smb-volume
+          mountPath: /d    
+          
   nodeSelector: 
     kubernetes.io/os: windows
+  volumes:
+  - name: smb-volume
+    flexVolume:
+      driver: "microsoft.com/smb.cmd"
+      secretRef:
+        name: "smb-secret"
+      options:
+        # source can be in any of the following formats 
+        # \\servername\share\path  (\'s will need to be escaped)
+        # smb://servername/share/path
+        # //servername/share/path
+        source: "\\\\192.168.202.118\\sharedfolder"
+
+
 
