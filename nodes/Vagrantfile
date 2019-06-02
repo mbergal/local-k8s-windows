@@ -11,7 +11,8 @@
 # k8s-win-worker-1 - 192.168.200.6
 
 num_workers = 1
-master_memory = 4096
+dhcp_memory=256
+master_memory = 2048
 master_cpu_cores = 2
 worker_memory = 4096
 worker_cpu_cores = 2
@@ -59,10 +60,12 @@ Vagrant.configure("2") do |config|
         smb_password: vagrantSmbPassword, smb_username: vagrantSmbUsernameNoDomain
     dhcp.vm.box = "bento/ubuntu-16.04"
     dhcp.vm.provider "hyperv" do |hyperv|
+      hyperv.memory = dhcp_memory
       hyperv.vmname = "dhcp"
     end
     dhcp.vm.network "private_network", bridge: "Default Switch"
-    dhcp.vm.provision "shell", path: 'dhcp/install-dhcp.sh', name: "install-dhcp.sh"
+    dhcp.vm.provision "shell", path: 'dhcp/install-dhcp.sh', name: "Install DHCP"
+    dhcp.vm.provision "shell", path: 'dhcp/install-dns.sh', name: "Install DNS"
   end
 
   config.vm.define "storage", primary: true do |storage|
@@ -80,6 +83,24 @@ Vagrant.configure("2") do |config|
     storage.vm.network "private_network", bridge: bridge
     storage.vm.provision "shell", path: './storage/install-nfs.sh', name: "Install NFS"
     storage.vm.provision "shell", path: './storage/install-samba.sh', name: "Install Samba"
+  end
+
+  config.vm.define "registry", primary: true do |registry|
+    registry.vm.synced_folder ".", "/vagrant", type: "smb",
+      smb_password: vagrantSmbPassword, smb_username: vagrantSmbUsernameNoDomain
+    registry.vm.box = "bento/ubuntu-16.04"
+    registry.vm.hostname = "registry"
+    #master.vmname = 
+    registry.vm.provider "hyperv" do |hyperv|
+      hyperv.vmname = "registry"
+      hyperv.memory = master_memory
+      hyperv.cpus = master_cpu_cores
+      hyperv.mac = "00155D300176"
+    end
+    registry.vm.network "private_network", bridge: bridge
+    registry.vm.provision "shell", path: './install-docker.sh', name: "Install Docker"
+    registry.vm.provision "shell", path: './registry/generate-certs.sh', name: "Generate certs"
+    registry.vm.provision "shell", path: './registry/run-registry.sh', name: "Run registry"
   end
 
   # Master Configuration
