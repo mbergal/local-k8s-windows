@@ -28,4 +28,7 @@ WaitForPodToStart "hello-world-linux"
 WaitForPodToStart "hello-world-win"
 
 kubectl exec -it hello-world-linux echo "hello-world-linux is OK"
+kubectl exec -it hello-world-linux touch "/mnt/linux-echo"
 kubectl exec -it hello-world-win cmd /c echo "hello-world-win is OK"
+kubectl exec -it hello-world-win cmd /c dir c:\d
+
