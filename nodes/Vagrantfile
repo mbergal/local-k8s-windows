@@ -12,7 +12,9 @@
 
 num_workers = 1
 dhcp_memory=256
+storage_memory = 512
 master_memory = 2048
+
 master_cpu_cores = 2
 worker_memory = 4096
 worker_cpu_cores = 2
@@ -76,7 +78,7 @@ Vagrant.configure("2") do |config|
     #master.vmname = 
     storage.vm.provider "hyperv" do |hyperv|
       hyperv.vmname = "k8s-storage"
-      hyperv.memory = master_memory
+      hyperv.memory = storage_memory
       hyperv.cpus = master_cpu_cores
       hyperv.mac = "00155D300175"
     end

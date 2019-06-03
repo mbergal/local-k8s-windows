@@ -11,8 +11,8 @@ $TTL 604800
 ;
 
 ns1.k8s.local.  IN A 192.168.200.2
-storage.k8s.local IN 192.168.200.3
-registry.k8s.local IN 192.168.200.7
+storage.k8s.local. IN A 192.168.200.3
+registry.k8s.local. IN A 192.168.200.7
 k8s-master.k8s.local.  IN A 192.168.200.4
 k8s-worker-1.k8s.local.  IN A 192.168.200.5
 k8s-win-worker-1.k8s.local.  IN A 192.168.200.6

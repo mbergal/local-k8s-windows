@@ -1,4 +1,4 @@
-apt-get-update
+apt-get update
 apt install -y nfs-kernel-server
 mkdir -p /mnt/sharedfolder
 chown nobody:nogroup /mnt/sharedfolder
