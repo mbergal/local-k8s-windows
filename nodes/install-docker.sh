@@ -8,3 +8,8 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubun
 sudo apt-get update -y
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 sudo docker run hello-world
+
+echo "Installing local Docker registry certificate..."
+sudo mkdir -p /etc/docker/certs.d/registry.k8s.local
+cp /vagrant/registry.local.crt  /etc/docker/certs.d/registry.k8s.local/ca.crt
+echo "...done"

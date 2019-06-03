@@ -4,7 +4,7 @@ openssl genrsa -out registry.key 2048
 echo "...done"
 
 echo "Generate CSR ..."
-openssl req -new -days 365 -key registry.key -out registry.local.csr -subj "/C=US/ST=IA/CN=registry.local"
+openssl req -new -days 365 -key registry.key -out registry.local.csr -subj "/CN=registry.k8s.local"
 echo "...done"
 
 echo "Create certificate ..."
