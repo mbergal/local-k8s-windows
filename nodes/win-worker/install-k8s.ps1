@@ -50,4 +50,6 @@ Write-Host "Setting up flexvolume SMB plugin for k8s..."
 cp -R c:\vagrant\win-worker\microsoft.com~smb.cmd c:\usr\libexec\kubernetes\kubelet-plugins\volume\exec\microsoft.com~smb.cmd -Force -Container
 Write-Host "...done"
 
+certutil -enterprise -f -v -AddStore "Root" C:\vagrant\registry.local.crt
+
 echo "" > C:\install-k8s.done
