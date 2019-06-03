@@ -18,4 +18,5 @@ spec:
   - name: nfs
     persistentVolumeClaim:
       claimName: nfs
-
+  imagePullSecrets:
+  - name: regcred
