@@ -25,7 +25,7 @@ spec:
         # \\servername\share\path  (\'s will need to be escaped)
         # smb://servername/share/path
         # //servername/share/path
-        source: "\\\\192.168.202.118\\sharedfolder"
+        source: "\\\\storage.k8s.local\\sharedfolder"
 
 
 

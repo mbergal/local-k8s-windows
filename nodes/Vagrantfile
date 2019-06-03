@@ -159,7 +159,7 @@ Vagrant.configure("2") do |config|
         hyperv.cpus = worker_cpu_cores
         hyperv.mac = "00155D300173" # need to take into accoung worker_id
       end
-      worker.vm.network "private_network", bridge: "Default Switch"
+      worker.vm.network "private_network", bridge: bridge
       worker.vm.communicator = "winrm"
       worker.winrm.username = "vagrant"
       worker.winrm.password = "vagrant"

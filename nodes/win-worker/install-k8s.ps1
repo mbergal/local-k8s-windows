@@ -47,7 +47,7 @@ wget https://raw.githubusercontent.com/Microsoft/SDN/master/Kubernetes/flannel/s
 Write-Host "...done"
 
 Write-Host "Setting up flexvolume SMB plugin for k8s..."
-cp -R c:\vagrant\win-worker\microsoft.com~smb.cmd c:\usr\libexec\kubernetes\kubelet-plugins\volume\exec\ -Force -Container
+cp -R c:\vagrant\win-worker\microsoft.com~smb.cmd c:\usr\libexec\kubernetes\kubelet-plugins\volume\exec\microsoft.com~smb.cmd -Force -Container
 Write-Host "...done"
 
 echo "" > C:\install-k8s.done
